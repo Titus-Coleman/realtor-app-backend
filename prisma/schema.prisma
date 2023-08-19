@@ -27,6 +27,10 @@ model Home {
   updated_at    DateTime     @updatedAt
   created_at    DateTime     @default(now())
   property_type PropertyType
+  images        Image[]
+  agent_id      Int
+  agent         User         @relation(fields: [agent_id], references: [id])
+  message       Message[]
 }
 
 model Image {
@@ -34,11 +38,22 @@ model Image {
   url        String
   updated_at DateTime @updatedAt
   created_at DateTime @default(now())
+  home_id    Int
+  home       Home     @relation(fields: [home_id], references: [id])
 }
 
 model Message {
-  id      Int    @id @default(autoincrement())
-  message String
+  id       Int    @id @default(autoincrement())
+  message  String
+  home_id  Int
+  home     Home   @relation(fields: [home_id], references: [id])
+  agent_id Int
+  agent    User   @relation("agent_message", fields: [agent_id], references: [id])
+  buyer_id Int
+  buyer    User   @relation("buyer_message", fields: [buyer_id], references: [id])
+
+  User   User? @relation(fields: [userId], references: [id])
+  userId Int?
 }
 
 enum UserType {
@@ -48,12 +63,16 @@ enum UserType {
 }
 
 model User {
-  id         Int      @id @default(autoincrement())
-  name       String
-  phone      String
-  email      String
-  password   String
-  created_at DateTime @default(now())
-  updated_at DateTime @updatedAt
-  user_type  UserType
+  id            Int       @id @default(autoincrement())
+  name          String
+  phone         String
+  email         String
+  password      String
+  created_at    DateTime  @default(now())
+  updated_at    DateTime  @updatedAt
+  user_type     UserType
+  homes         Home[]
+  agent_message Message[] @relation("agent_message")
+  buyer_message Message[] @relation("buyer_message")
+  message       Message[]
 }
