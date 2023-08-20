@@ -1,20 +1,30 @@
-import { Controller, Delete, Get, Post, Put } from '@nestjs/common';
+import { Controller, Delete, Get, Param, Post, Put,Body } from '@nestjs/common';
+import { HomeService } from './home.service';
+import { CreateHomeDto } from 'src/user/Dtos/home.dto';
 
 @Controller('home')
 export class HomeController {
+
+    constructor(private readonly homeService: HomeService){}
+
     @Get()
     getHomes(){
-        return []
+        return this.homeService.getHomes();
     }
 
     @Get(':id')
-    getHomebyId(){
-        return {}
+    getHomebyId(
+        @Param('id') id: number
+        ){
+        return this.homeService.getHomesById(id)
     }
 
     @Post()
-    createHome(){
-        return {}
+    createHome(
+        @Body() body: CreateHomeDto
+
+    ){
+        return this.homeService.createHome(body)
     }
 
     @Put(':id')
