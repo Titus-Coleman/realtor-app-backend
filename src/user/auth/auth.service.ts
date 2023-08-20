@@ -1,4 +1,4 @@
-import { Injectable, ConflictException, UnauthorizedException } from '@nestjs/common';
+import { Injectable, ConflictException, UnauthorizedException, HttpException } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
 import * as bcrypt from 'bcrypt';
 import { UserType } from '@prisma/client';
@@ -13,6 +13,11 @@ interface SignupParams {
     phone: string;
 }
 
+interface SigninParams {
+    email: string;
+    password: string;
+}
+
 @Injectable()
 export class AuthService {
 
@@ -20,7 +25,7 @@ export class AuthService {
         private readonly prismaService: PrismaService
     ){}
 
-    async signup({email, password, name, phone}: SignupParams) {
+    async signup({email, password, name, phone}: SignupParams, userType: UserType) {
         const userExists = await this.prismaService.user.findUnique({
             where: {
                 email
@@ -32,28 +37,57 @@ export class AuthService {
        }
 
        const hashPw = await bcrypt.hash(password, 10)
-    //    const isMatch = await bcrypt.compare(password, hashPw);
 
-    //    if(!isMatch) {
-    //     throw new UnauthorizedException
-    //    }
     const user = await this.prismaService.user.create({
         data: {
             email,
             name,
             phone,
             password: hashPw,
-            user_type: UserType.BUYER
+            user_type: userType
         }
     })
-    const token = await jwt.sign(
-        {name, id: user.id}, 
-        process.env.JSON_TOKEN_KEY,{
-        expiresIn: 360000,
-    })
+    return this.generateJWT(user.name,user.id)
 
-    return token
 
     }
 
+
+    async signin({email, password}: SigninParams){
+        const user = await this.prismaService.user.findUnique({
+            where: {
+                email
+            }
+        })
+
+        if(!user) {
+            throw new HttpException('Invalid credentials', 400)
+           }
+        
+        const hashedPw = user.password
+        const isValidPassword = await bcrypt.compare(password, hashedPw);
+
+       if(!isValidPassword) {
+        throw new HttpException('Invalid credentials', 400)
+       }
+
+       return this.generateJWT(user.name,user.id)
+    }
+
+   private async generateJWT(name: string, id:number){
+    const token = await jwt.sign(
+        {
+            name, 
+            id
+        }, 
+        process.env.JSON_TOKEN_KEY,{
+        expiresIn: 360000,
+    })
+   }
+
+    generateProductKey(email: string, userType: UserType){
+    const string = `${email}-${userType}-${process.env.PRODUCT_KEY_SECRET}`
+
+    return bcrypt.hash(string, 10)
+   }
 }
