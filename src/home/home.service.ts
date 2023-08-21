@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { PropertyType } from '@prisma/client';
 import { PrismaService } from 'src/prisma/prisma.service';
-import { CreateHomeDto } from 'src/user/Dtos/home.dto';
+import { CreateHomeDto, HomeResponseDto } from 'src/home/Dtos/home.dto';
 
 
 interface HomeParams {
@@ -27,8 +27,9 @@ export class HomeService {
         private readonly prismaService: PrismaService
     ){}
 
-    getHomes(){
-        return this.prismaService.home.findMany()
+    async getHomes(): Promise<HomeResponseDto[]> {
+        return await this.prismaService.home.findMany()
+        
     }
 
     async getHomesById(id: number){

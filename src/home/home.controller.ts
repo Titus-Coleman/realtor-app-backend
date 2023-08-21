@@ -1,14 +1,15 @@
-import { Controller, Delete, Get, Param, Post, Put,Body } from '@nestjs/common';
+import { Controller, Delete, Get, Param, Post, Put,Body,  ClassSerializerInterceptor, UseInterceptors} from '@nestjs/common';
 import { HomeService } from './home.service';
-import { CreateHomeDto } from 'src/user/Dtos/home.dto';
+import { CreateHomeDto, HomeResponseDto } from 'src/home/Dtos/home.dto';
 
+@UseInterceptors(ClassSerializerInterceptor)
 @Controller('home')
 export class HomeController {
 
     constructor(private readonly homeService: HomeService){}
 
     @Get()
-    getHomes(){
+    getHomes(): Promise<HomeResponseDto[]> {
         return this.homeService.getHomes();
     }
 
