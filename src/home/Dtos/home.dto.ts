@@ -1,6 +1,6 @@
 import { PropertyType, UserType } from "@prisma/client";
 import { Exclude } from "class-transformer";
-import { IsString, IsNotEmpty, IsEmail, MinLength, Matches, IsEnum, IsOptional, IsNumber } from "class-validator";
+import { IsString, IsNotEmpty, IsEnum, IsOptional, IsNumber } from "class-validator";
 
 
 export class HomeResponseDto {
@@ -15,7 +15,6 @@ export class HomeResponseDto {
     land_size:     number;
     property_type: PropertyType;
 
- /* THIS EXCLUDE FEATURE DOES NOT WORK */   
     @Exclude()
     updated_at: Date;
     @Exclude()
@@ -24,7 +23,7 @@ export class HomeResponseDto {
     agent_id:      number;
     
     // @IsOptional()
-    // images?:        string;
+    image:        string;
     
     constructor(partial: Partial<HomeResponseDto>){
         Object.assign(this, partial);

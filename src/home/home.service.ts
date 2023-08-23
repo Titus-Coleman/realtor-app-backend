@@ -28,14 +28,52 @@ export class HomeService {
     ){}
 
     async getHomes(): Promise<HomeResponseDto[]> {
-        return await this.prismaService.home.findMany()
+        const homes = await this.prismaService.home.findMany(
+            {
+            select: {
+                id: true,
+                address: true,
+                city: true,
+                price: true,
+                property_type: true,
+                bathrooms: true,
+                bedrooms: true,
+                images: {
+                    select: {
+                        url: true,
+                    },
+                    take: 1,
+                },
+            }
+    })
+     
+       return homes.map((home) => 
+        {
+            const fetchHome = {...home, image: home.images[0].url}
+            delete fetchHome.images
+             return new HomeResponseDto(fetchHome)
+        })
         
     }
-
+    
     async getHomesById(id: number){
         return await this.prismaService.home.findUnique({
             where: {
                 id
+            },
+            select: {
+                address: true,
+                city: true,
+                price: true,
+                property_type: true,
+                bathrooms: true,
+                bedrooms: true,
+                images: {
+                    select: {
+                        url: true,
+                    },
+                    take: 1,
+                },
             }
         })
     }
