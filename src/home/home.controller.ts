@@ -47,6 +47,7 @@ export class HomeController {
         @Body() body: CreateHomeDto
 
     ){
+        console.log(body)
         return this.homeService.createHome(body)
     }
 

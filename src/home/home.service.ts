@@ -10,11 +10,10 @@ interface HomeParams {
     bedrooms: number;
     bathrooms: number;
     city:      string;
-    // listed_date:   DateTime     @default(now())
     price:         number;
     land_size:     number;
     property_type: PropertyType;
-    images? :        string;
+    // images :        { url: string }[];
     agent_id:      number;
     // agent:         User         @relation(fields: [agent_id], references: [id])
     // message:       Message[]
@@ -96,21 +95,38 @@ export class HomeService {
         })
     }
 
-    async createHome(body: HomeParams) {
-        return await this.prismaService.home.create(
+    async createHome({
+        address,
+        bedrooms,
+        bathrooms,
+        city,
+        price,
+        land_size,
+        property_type,
+        agent_id,
+        images
+    }: CreateHomeDto) {
+       const home = await this.prismaService.home.create(
             {
                 data: {
-                    address: body.address,
-                    bedrooms: body.bedrooms,
-                    bathrooms: body.bathrooms,
-                    city: body.city,
-                    price: body.price,
-                    land_size: body.land_size,
-                    property_type: body.property_type,
-                    agent_id: body.agent_id
-
+                    address,
+                    bedrooms,
+                    bathrooms,
+                    city,
+                    price,
+                    land_size,
+                    property_type,
+                    agent_id,
                 }
             }
         )
+        
+        const homeImages = 
+            images.map(image => {return {...image, home_id: home.id}})
+       
+        await this.prismaService.image.createMany({data: homeImages})
+        
+
+        return home
     }
 }
