@@ -31,6 +31,8 @@ model Home {
   agent_id      Int
   agent         User         @relation(fields: [agent_id], references: [id])
   message       Message[]
+  //Note to future self: use entry below to allow for scheduled deletions
+  //set_to_delete Boolean
 }
 
 model Image {

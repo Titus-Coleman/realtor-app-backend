@@ -1,6 +1,6 @@
 import { Controller, Delete, Get, Param, Post, Put,Body,  ClassSerializerInterceptor, UseInterceptors, Query} from '@nestjs/common';
 import { HomeService } from './home.service';
-import { CreateHomeDto, HomeResponseDto } from 'src/home/Dtos/home.dto';
+import { CreateHomeDto, HomeResponseDto, UpdateHomeDto } from 'src/home/Dtos/home.dto';
 import { PropertyType } from '@prisma/client';
 
 @UseInterceptors(ClassSerializerInterceptor)
@@ -51,8 +51,17 @@ export class HomeController {
     }
 
     @Put(':id')
-    updateHome(){}
+    updateHome(
+        @Param('id') id: number,
+        @Body() body: UpdateHomeDto
+    ){
+        return this.homeService.updateHome(id, body)
+    }
 
     @Delete(':id')
-    deleteHome(){}
+    deleteHome(
+        @Param('id') id: number,
+    ){
+        return this.homeService.deleteHome(id)
+    }
 }

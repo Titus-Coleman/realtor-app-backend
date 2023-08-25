@@ -1,7 +1,7 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { PropertyType } from '@prisma/client';
 import { PrismaService } from 'src/prisma/prisma.service';
-import { CreateHomeDto, HomeResponseDto } from 'src/home/Dtos/home.dto';
+import { CreateHomeDto, HomeResponseDto, UpdateHomeDto } from 'src/home/Dtos/home.dto';
 
 
 interface HomeParams {
@@ -133,5 +133,58 @@ export class HomeService {
         }
 
         return newHome
+    }
+
+    async updateHome(
+        id: number, 
+        {
+            address,
+            bedrooms,
+            bathrooms,
+            city,
+            price,
+            land_size,
+            property_type,
+        }: UpdateHomeDto){
+
+            const updatedHome =  await this.prismaService.home.update({
+            where: {
+                id
+            },
+            data: {
+                address,
+                bedrooms,
+                bathrooms,
+                city,
+                price,
+                land_size,
+                property_type
+            }
+        })
+        console.log(updatedHome)
+        return updatedHome
+    }
+
+    async deleteHome(id: number){
+        await this.prismaService.image.deleteMany({
+            where: {
+                home_id: id
+        }})
+        await this.prismaService.home.delete({
+            where: {
+                id
+            }
+        })
+
+        const confirmDelete = await this.prismaService.home.findUnique({
+            where: {
+                id
+            }
+        })
+
+        if(!confirmDelete){
+            return `Home:${id} has been deleted`
+        }
+   
     }
 }
