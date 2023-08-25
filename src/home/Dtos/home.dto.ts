@@ -22,7 +22,6 @@ export class HomeResponseDto {
     @Exclude()
     agent_id:      number;
     
-    // @IsOptional()
     image:        string;
     
     constructor(partial: Partial<HomeResponseDto>){

@@ -105,7 +105,7 @@ export class HomeService {
         property_type,
         agent_id,
         images
-    }: CreateHomeDto) {
+    }: CreateHomeDto): Promise<HomeResponseDto> {
        const home = await this.prismaService.home.create(
             {
                 data: {
@@ -127,6 +127,11 @@ export class HomeService {
         await this.prismaService.image.createMany({data: homeImages})
         
 
-        return home
+        const newHome = {
+            ...home,
+            image: images[0].url
+        }
+
+        return newHome
     }
 }
