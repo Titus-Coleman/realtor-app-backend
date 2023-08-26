@@ -1,34 +1,9 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { PropertyType } from '@prisma/client';
 import { PrismaService } from 'src/prisma/prisma.service';
-import { CreateHomeDto, HomeResponseDto, UpdateHomeDto } from 'src/home/Dtos/home.dto';
+import { CreateHomeDto, FilterParams, HomeResponseDto, UpdateHomeDto } from 'src/home/Dtos/home.dto';
 
 
-interface HomeParams {
-    
-    address: string;
-    bedrooms: number;
-    bathrooms: number;
-    city:      string;
-    price:         number;
-    land_size:     number;
-    property_type: PropertyType;
-    // images :        { url: string }[];
-    agent_id:      number;
-    // agent:         User         @relation(fields: [agent_id], references: [id])
-    // message:       Message[]
-}
-
-interface FilterParams {
-    propertyType?: PropertyType;
-    bathrooms?: number;
-    bedrooms?: number;
-    price?: {
-        lte?: number;
-        gte?: number;
-    };
-    city?: string;
-}
 
 @Injectable()
 export class HomeService {
@@ -37,7 +12,7 @@ export class HomeService {
         private readonly prismaService: PrismaService
     ){}
 
-    async getHomes(filters: FilterParams): Promise<HomeResponseDto[]> {
+    async getHomes(filters: FilterParams ): Promise<HomeResponseDto[]> {
         const homes = await this.prismaService.home.findMany(
             {
             select: {
@@ -145,7 +120,15 @@ export class HomeService {
             price,
             land_size,
             property_type,
-        }: UpdateHomeDto){
+        }: UpdateHomeDto): Promise<HomeResponseDto> {
+            const home = await this.prismaService.home.findUnique({
+                where: {
+                    id,
+                }
+            })
+            if(!home) {
+                throw new NotFoundException();
+            }
 
             const updatedHome =  await this.prismaService.home.update({
             where: {
@@ -161,11 +144,20 @@ export class HomeService {
                 property_type
             }
         })
-        console.log(updatedHome)
         return updatedHome
     }
 
     async deleteHome(id: number){
+        const home = await this.prismaService.home.findUnique({
+            where: {
+                id,
+            }
+        })
+        if(!home) {
+            throw new NotFoundException();
+        }
+
+
         await this.prismaService.image.deleteMany({
             where: {
                 home_id: id

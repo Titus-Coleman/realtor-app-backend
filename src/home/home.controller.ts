@@ -1,4 +1,4 @@
-import { Controller, Delete, Get, Param, Post, Put,Body,  ClassSerializerInterceptor, UseInterceptors, Query} from '@nestjs/common';
+import { Controller, Delete, Get, Param, Post, Put,Body,  ClassSerializerInterceptor, UseInterceptors, Query, ParseIntPipe, ParseEnumPipe} from '@nestjs/common';
 import { HomeService } from './home.service';
 import { CreateHomeDto, HomeResponseDto, UpdateHomeDto } from 'src/home/Dtos/home.dto';
 import { PropertyType } from '@prisma/client';
@@ -16,7 +16,7 @@ export class HomeController {
             @Query('maxPrice') maxPrice?: string,
             @Query('bedrooms') bedrooms?: string,
             @Query('bathrooms') bathrooms?: string,
-            @Query('propertyType') propertyType?: PropertyType,
+            @Query('propertyType', new ParseEnumPipe(PropertyType)) propertyType?: PropertyType,
     ): Promise<HomeResponseDto[]> {
         const price = minPrice || maxPrice ? {
             ...(minPrice && {gte: parseFloat(minPrice)}),
@@ -37,7 +37,7 @@ export class HomeController {
 
     @Get(':id')
     getHomebyId(
-        @Param('id') id: number
+        @Param('id', ParseIntPipe) id: number
         ){
         return this.homeService.getHomesById(id)
     }
@@ -52,7 +52,7 @@ export class HomeController {
 
     @Put(':id')
     updateHome(
-        @Param('id') id: number,
+        @Param('id', ParseIntPipe) id: number,
         @Body() body: UpdateHomeDto
     ){
         return this.homeService.updateHome(id, body)
@@ -60,7 +60,7 @@ export class HomeController {
 
     @Delete(':id')
     deleteHome(
-        @Param('id') id: number,
+        @Param('id', ParseIntPipe) id: number,
     ){
         return this.homeService.deleteHome(id)
     }

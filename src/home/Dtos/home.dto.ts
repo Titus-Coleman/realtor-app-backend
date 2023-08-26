@@ -22,7 +22,7 @@ export class HomeResponseDto {
     @Exclude()
     agent_id:      number;
     
-    image:        string;
+    image?:        string;
     
     constructor(partial: Partial<HomeResponseDto>){
         Object.assign(this, partial);
@@ -65,6 +65,7 @@ export class CreateHomeDto {
     @IsEnum(PropertyType)
     property_type: PropertyType;
 
+    
     @IsArray()
     @ValidateNested({each: true})
     @Type(() => Image)
@@ -113,7 +114,7 @@ export class UpdateHomeDto {
     @IsEnum(PropertyType)
     property_type?: PropertyType;
 
-    
+
 
     // @IsArray()
     // @ValidateNested({each: true})
@@ -127,4 +128,34 @@ export class UpdateHomeDto {
     // agent:         User         @relation(fields: [agent_id], references: [id])
     // message:       Message[]
 
+}
+
+export class FilterParams {
+    @IsOptional()
+    @IsEnum(PropertyType)
+    propertyType?: PropertyType;
+    
+    @IsOptional()
+    @IsNumber()
+    @IsPositive()
+    bathrooms?: number;
+
+    @IsOptional()
+    @IsNumber()
+    @IsPositive()
+    bedrooms?: number;
+
+    @IsOptional()
+    @ValidateNested({each: true})
+    @IsNumber()
+    @IsPositive()
+    price?: {
+        lte?: number;
+        gte?: number;
+    };
+
+    @IsOptional()
+    @IsString()
+    @IsNotEmpty()
+    city?: string;
 }
