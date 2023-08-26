@@ -1,7 +1,9 @@
-import { Controller, Delete, Get, Param, Post, Put,Body,  ClassSerializerInterceptor, UseInterceptors, Query, ParseIntPipe, ParseEnumPipe} from '@nestjs/common';
+import { Controller, Delete, Get, Param, Post, Put,Body,  ClassSerializerInterceptor, UseInterceptors, Query, ParseIntPipe, ParseEnumPipe, HttpException, HttpStatus} from '@nestjs/common';
 import { HomeService } from './home.service';
 import { CreateHomeDto, HomeResponseDto, UpdateHomeDto } from 'src/home/Dtos/home.dto';
 import { PropertyType } from '@prisma/client';
+import { User, UserData } from 'src/user/decorators/user.decorator';
+import { OptionalEnumPipe } from './pipes/enumPipe';
 
 @UseInterceptors(ClassSerializerInterceptor)
 @Controller('home')
@@ -16,7 +18,7 @@ export class HomeController {
             @Query('maxPrice') maxPrice?: string,
             @Query('bedrooms') bedrooms?: string,
             @Query('bathrooms') bathrooms?: string,
-            @Query('propertyType', new ParseEnumPipe(PropertyType)) propertyType?: PropertyType,
+            @Query('propertyType', new OptionalEnumPipe()) propertyType?: PropertyType,
     ): Promise<HomeResponseDto[]> {
         const price = minPrice || maxPrice ? {
             ...(minPrice && {gte: parseFloat(minPrice)}),
@@ -44,10 +46,16 @@ export class HomeController {
 
     @Post()
     createHome(
+        @User() user: UserData,
         @Body() body: CreateHomeDto
+        
 
     ){
-        return this.homeService.createHome(body)
+        if(!user) {
+            throw new HttpException('Please login or create an account', HttpStatus.UNAUTHORIZED)
+        }
+        return this.homeService.createHome(body, user.id)
+       
     }
 
     @Put(':id')

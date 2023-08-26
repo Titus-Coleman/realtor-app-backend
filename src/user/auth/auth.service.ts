@@ -83,7 +83,10 @@ export class AuthService {
         process.env.JSON_TOKEN_KEY,{
         expiresIn: 360000,
     })
+    console.log(token)
+    return token
    }
+
 
     generateProductKey(email: string, userType: UserType){
     const string = `${email}-${userType}-${process.env.PRODUCT_KEY_SECRET}`

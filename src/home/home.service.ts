@@ -1,7 +1,8 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable, NotFoundException } from '@nestjs/common';
 import { PropertyType } from '@prisma/client';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { CreateHomeDto, FilterParams, HomeResponseDto, UpdateHomeDto } from 'src/home/Dtos/home.dto';
+import { UserData } from 'src/user/decorators/user.decorator';
 
 
 
@@ -78,9 +79,19 @@ export class HomeService {
         price,
         land_size,
         property_type,
-        agent_id,
         images
-    }: CreateHomeDto): Promise<HomeResponseDto> {
+    }: CreateHomeDto, agent_id: number): Promise<HomeResponseDto> {
+        const validAgent = await this.prismaService.user.findUnique({
+            where: {
+                id: agent_id,
+                user_type: "AGENT"
+            }
+        })
+
+        if(!validAgent){
+            throw new HttpException('This user cannot list homes', HttpStatus.UNAUTHORIZED)
+        }
+
        const home = await this.prismaService.home.create(
             {
                 data: {

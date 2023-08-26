@@ -71,9 +71,9 @@ export class CreateHomeDto {
     @Type(() => Image)
     images:        Image[];
 
-    @IsNumber()
-    @IsNotEmpty()
-    agent_id:      number;
+    // @IsNumber()
+    // @IsNotEmpty()
+    // agent_id:      number;
     // agent:         User         @relation(fields: [agent_id], references: [id])
     // message:       Message[]
 
