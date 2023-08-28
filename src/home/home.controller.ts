@@ -1,4 +1,4 @@
-import { Controller, Delete, Get, Param, Post, Put,Body,  ClassSerializerInterceptor, UseInterceptors, Query, ParseIntPipe, ParseEnumPipe, HttpException, HttpStatus} from '@nestjs/common';
+import { Controller, Delete, Get, Param, Post, Put,Body,  ClassSerializerInterceptor, UseInterceptors, Query, ParseIntPipe, HttpException, HttpStatus} from '@nestjs/common';
 import { HomeService } from './home.service';
 import { CreateHomeDto, HomeResponseDto, UpdateHomeDto } from 'src/home/Dtos/home.dto';
 import { PropertyType } from '@prisma/client';
@@ -59,17 +59,37 @@ export class HomeController {
     }
 
     @Put(':id')
-    updateHome(
+    async updateHome(
         @Param('id', ParseIntPipe) id: number,
-        @Body() body: UpdateHomeDto
+        @Body() body: UpdateHomeDto,
+        @User() user: UserData
     ){
-        return this.homeService.updateHome(id, body)
+      
+        const agent = await this.homeService.getAgentByHomeId(id)
+       
+        if(agent !== user.id ){
+            throw new HttpException('User is not authorized to edit this home', HttpStatus.UNAUTHORIZED)
+        }
+
+        return await this.homeService.updateHome(id, body)
     }
 
     @Delete(':id')
-    deleteHome(
+    async deleteHome(
         @Param('id', ParseIntPipe) id: number,
+        @User() user: UserData
     ){
-        return this.homeService.deleteHome(id)
+        if(!user.id){
+            throw new HttpException('Please login to delete this home', HttpStatus.UNAUTHORIZED)
+        }
+
+
+        const agent = await this.homeService.getAgentByHomeId(id)
+
+        if(agent !== user.id ){
+            throw new HttpException('User is not authorized to delete this home', HttpStatus.UNAUTHORIZED)
+        }
+
+        return await this.homeService.deleteHome(id)
     }
 }

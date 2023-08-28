@@ -162,6 +162,9 @@ export class HomeService {
         const home = await this.prismaService.home.findUnique({
             where: {
                 id,
+            },
+            select: {
+                address: true
             }
         })
         if(!home) {
@@ -186,8 +189,32 @@ export class HomeService {
         })
 
         if(!confirmDelete){
-            return `Home:${id} has been deleted`
+            return `The listing for ${home.address} has been deleted`
         }
    
+    }
+
+    async getAgentByHomeId(id: number){
+        const home = await this.prismaService.home.findUnique({
+            where: {
+                id
+            },
+            select: {
+                agent: {
+                    select: {
+                        name: true,
+                        id: true,
+                        email: true,
+                        phone: true,
+                    }
+                }
+            }
+        })
+
+        if(!home){
+            throw new NotFoundException();
+        }
+
+        return home.agent.id
     }
 }
