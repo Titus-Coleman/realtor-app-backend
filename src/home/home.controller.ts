@@ -1,9 +1,11 @@
-import { Controller, Delete, Get, Param, Post, Put,Body,  ClassSerializerInterceptor, UseInterceptors, Query, ParseIntPipe, HttpException, HttpStatus} from '@nestjs/common';
+import { Controller, Delete, Get, Param, Post, Put,Body,  ClassSerializerInterceptor, UseInterceptors, Query, ParseIntPipe, HttpException, HttpStatus, UseGuards} from '@nestjs/common';
 import { HomeService } from './home.service';
 import { CreateHomeDto, HomeResponseDto, UpdateHomeDto } from 'src/home/Dtos/home.dto';
-import { PropertyType } from '@prisma/client';
+import { PropertyType, UserType } from '@prisma/client';
 import { User, UserData } from 'src/user/decorators/user.decorator';
 import { OptionalEnumPipe } from './pipes/enumPipe';
+import { AuthGuard } from 'src/guards/auth.guard';
+import { Roles } from 'src/user/decorators/roles.decorator';
 
 @UseInterceptors(ClassSerializerInterceptor)
 @Controller('home')
@@ -44,20 +46,21 @@ export class HomeController {
         return this.homeService.getHomesById(id)
     }
 
+    @Roles(UserType.AGENT, UserType.ADMIN)
+    // @UseGuards(AuthGuard) implemented at the module level
     @Post()
     createHome(
         @User() user: UserData,
         @Body() body: CreateHomeDto
-        
-
     ){
         if(!user) {
             throw new HttpException('Please login or create an account', HttpStatus.UNAUTHORIZED)
         }
-        return this.homeService.createHome(body, user.id)
-       
+        // return this.homeService.createHome(body, user.id)
+       return 'Created Home'
     }
 
+    @Roles(UserType.AGENT, UserType.ADMIN)
     @Put(':id')
     async updateHome(
         @Param('id', ParseIntPipe) id: number,
@@ -74,6 +77,7 @@ export class HomeController {
         return await this.homeService.updateHome(id, body)
     }
 
+    @Roles(UserType.AGENT, UserType.ADMIN)
     @Delete(':id')
     async deleteHome(
         @Param('id', ParseIntPipe) id: number,
@@ -92,4 +96,5 @@ export class HomeController {
 
         return await this.homeService.deleteHome(id)
     }
+
 }

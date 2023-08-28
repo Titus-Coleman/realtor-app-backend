@@ -190,6 +190,8 @@ export class HomeService {
 
         if(!confirmDelete){
             return `The listing for ${home.address} has been deleted`
+        } else {
+            return `The listing for ${home.address} cannot be deleted. Contact Support`
         }
    
     }

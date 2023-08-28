@@ -3,6 +3,7 @@ import { AuthService } from './auth.service';
 import { GenerateProductKeyDto, SigninDto, SignupDto } from '../Dtos/auth.dto';
 import { UserType } from '@prisma/client';
 import * as bcrypt from 'bcrypt';
+import { User, UserData } from '../decorators/user.decorator';
 
 @Controller('auth')
 export class AuthController {
@@ -46,4 +47,13 @@ export class AuthController {
     ){
         return this.authService.generateProductKey(email, userType)
     }
+
+    @Get('/me')
+    me(
+        @User() user: UserData
+    ){
+        return user
+    }
+
+    
 }
