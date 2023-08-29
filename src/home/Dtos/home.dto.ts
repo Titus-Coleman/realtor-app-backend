@@ -1,6 +1,6 @@
 import { PropertyType, UserType } from "@prisma/client";
 import { Exclude, Type } from "class-transformer";
-import { IsString, IsNotEmpty, IsEnum, IsNumber, IsPositive, IsArray, ValidateNested, ValidationTypes, IsOptional } from "class-validator";
+import { IsString, IsNotEmpty, IsEnum, IsNumber, IsPositive, IsArray, ValidateNested, ValidationTypes, IsOptional, MaxLength } from "class-validator";
 
 
 export class HomeResponseDto {
@@ -158,4 +158,12 @@ export class FilterParams {
     @IsString()
     @IsNotEmpty()
     city?: string;
+}
+
+export class InquiryDto {
+    @IsString()
+    @MaxLength(500)
+    @IsNotEmpty()
+    message: string;
+
 }

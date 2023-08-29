@@ -1,6 +1,6 @@
 import { Controller, Delete, Get, Param, Post, Put,Body,  ClassSerializerInterceptor, UseInterceptors, Query, ParseIntPipe, HttpException, HttpStatus, UseGuards} from '@nestjs/common';
 import { HomeService } from './home.service';
-import { CreateHomeDto, HomeResponseDto, UpdateHomeDto } from 'src/home/Dtos/home.dto';
+import { CreateHomeDto, HomeResponseDto, InquiryDto, UpdateHomeDto } from 'src/home/Dtos/home.dto';
 import { PropertyType, UserType } from '@prisma/client';
 import { User, UserData } from 'src/user/decorators/user.decorator';
 import { OptionalEnumPipe } from './pipes/enumPipe';
@@ -97,4 +97,38 @@ export class HomeController {
         return await this.homeService.deleteHome(id)
     }
 
+    @Roles(UserType.BUYER)
+    @Post('/:id/inquire')
+    inquire(
+        @Param('id', ParseIntPipe) homeId: number,
+        @Body() {message}: InquiryDto,
+        @User() user: UserData
+    ){
+        return this.homeService.inquire(user, homeId, message)
+    
+    }
+
+    @Roles(UserType.BUYER)
+    @Get('/:id/messages')
+    async getUserMessages(
+        @Param('id', ParseIntPipe) homeId: number,
+        @User() user: UserData
+    ){
+        return this.homeService.getUserMessages(user,homeId)
+    }
+
+    @Roles(UserType.AGENT)
+    @Get('/agent/:id/messages')
+    async getAgentMessages(
+        @Param('id', ParseIntPipe) homeId: number,
+        @User() user: UserData
+    ){
+
+        const agent = await this.homeService.getAgentByHomeId(homeId)
+
+        if(agent !== user.id ){
+            throw new HttpException('User is not authorized to view these messages', HttpStatus.UNAUTHORIZED)
+        }
+        return this.homeService.getAgentMessages(user,homeId)
+    }
 }

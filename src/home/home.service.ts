@@ -219,4 +219,71 @@ export class HomeService {
 
         return home.agent.id
     }
+
+    async inquire(user: UserData, homeId: number, message){
+        const agent = await this.getAgentByHomeId(homeId)
+      
+        return this.prismaService.message.create({
+            data: {
+                agent_id: agent,
+                buyer_id: user.id,
+                home_id: homeId,
+                message
+            }
+        })
+    }
+
+    async getUserMessages(user: UserData, homeId: number){
+
+        return await this.prismaService.message.findMany({
+            where: {
+                home_id: homeId,
+                buyer_id: user.id
+            },
+            select: {
+                message: true,
+                home_id: true,
+                home: {
+                    select: {
+                        address: true
+                    }
+                },
+                agent_id: true,
+                agent: {
+                    select: {
+                        name: true,
+                        phone: true
+                    }
+                }
+            }
+        })
+    }
+
+
+    async getAgentMessages(user: UserData, homeId: number){
+
+        return await this.prismaService.message.findMany({
+            where: {
+                home_id: homeId,
+                agent_id: user.id
+            },
+            select: {
+                message: true,
+                home_id: true,
+                home: {
+                    select: {
+                        address: true
+                    }
+                },
+                agent_id: true,
+                buyer: {
+                    select: {
+                        name: true,
+                        email: true,
+                        phone: true
+                    }
+                }
+            }
+        })
+    }
 }
